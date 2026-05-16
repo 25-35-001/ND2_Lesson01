@@ -8,6 +8,10 @@ public class Unitychan : MonoBehaviour
     public SpriteRenderer Renderer;
 
     public bool isWalk = false;
+    public Vector2 mousePoint;
+
+    public Vector3 targetPoint;
+    public GameObject weapon;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -18,13 +22,26 @@ public class Unitychan : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //アニメーションを動かす
         Animator.SetFloat("Velocity", Mathf.Abs(Velocity.x)*(isWalk ? 0.5f : 1));
-
+        //スプライトの反転
         if(Velocity.x <= -0.1f)Renderer.flipX = true;
         else if(0.1f <= Velocity.x)Renderer.flipX = false;
-
+        //座標を移動させる
         float speed = Velocity.x * 5 * (isWalk ? 0.5f : 1) * Time.deltaTime;
         transform.Translate(speed, 0, 0);
+
+        //ターゲット（マウス）の位置を保存し続ける
+        targetPoint = GetMousePoint();
+        //ターゲットとの角度（ラジアン）を求める
+        float diffX = targetPoint.x - transform.position.x;
+        float diffY = targetPoint.y - transform.position.y;
+        float radian = Mathf.Atan2(diffY,diffX);
+        //角度から向きベクトルを求める
+        float dy = Mathf.Sin(radian);
+        float dx = Mathf.Cos(radian);
+
+        weapon.transform.eulerAngles = new Vector3(0, 0, radian * 180 / Mathf.PI);
     }
 
     void OnMove(InputValue value)
@@ -35,5 +52,28 @@ public class Unitychan : MonoBehaviour
     void OnClick(InputValue value)
     {
         isWalk = value.Get<float>() >= 0.5f;
+    }
+
+    //マウスの座標の入力
+    void OnMousePoint(InputValue value)
+    {
+        mousePoint = value.Get<Vector2>();
+    }
+    //マウス座標を取得するメソッド
+    //引　数；なし
+    //戻り値；<Vector2型>の値
+    Vector2 GetMousePoint()
+    { 
+        //マウスの座標を取得
+        Vector2 mousePoint = this.mousePoint;
+
+        //メインカメラの情報を取得
+        Camera camera = Camera.main;
+
+        //[px]単位を[m]単位に変換
+        Vector3 worldPoint = camera.ScreenToWorldPoint(mousePoint);
+
+        //変換した値を返す
+        return worldPoint;
     }
 }
