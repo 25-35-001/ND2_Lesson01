@@ -13,6 +13,8 @@ public class Unitychan : MonoBehaviour
     public Vector3 targetPoint;
     public GameObject weapon;
 
+    public ParticleSystem footStampEffect;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -42,6 +44,8 @@ public class Unitychan : MonoBehaviour
         float dx = Mathf.Cos(radian);
 
         weapon.transform.eulerAngles = new Vector3(0, 0, radian * 180 / Mathf.PI);
+
+        FootStampControl();
     }
 
     void OnMove(InputValue value)
@@ -76,4 +80,25 @@ public class Unitychan : MonoBehaviour
         //変換した値を返す
         return worldPoint;
     }
+
+    //---足跡パーティクルの制御
+    //引数　：なし
+    //戻り値：なし
+    public void FootStampControl()
+    { 
+        //->三項演算子[条件式？　true : false;]
+        //1行で書けるif文...でも1行しか書けない...
+        //制御が1行でできる単純な場合に使用する
+        bool isStamp = Velocity.magnitude > 0.1f ? true : false;
+
+        if (isStamp && !footStampEffect.isPlaying)
+        {//動いていれば、エフェクトを出す
+            footStampEffect.Play();
+        }
+        if(!isStamp)
+        {//動いていない時は、エフェクトを止める
+            footStampEffect.Stop();
+        }
+    }
+
 }
